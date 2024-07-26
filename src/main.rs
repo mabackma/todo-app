@@ -46,9 +46,21 @@ fn App() -> Element {
             ul {
                 for todo in todos.iter() {
                     if todo.completed {
-                        li { "{todo.id}. {todo.text}: {todo.description} (completed)" }
+                        p {
+                            b { "{todo.id}. {todo.text}:" } 
+                            br {}
+                            " {todo.description}"
+                            br {}
+                            i { "completed" }
+                        }
                     } else {
-                        li { "{todo.id}. {todo.text}: {todo.description} (not completed)" }
+                        p {
+                            b { "{todo.id}. {todo.text}:" } 
+                            br {}
+                            " {todo.description}"
+                            br {}
+                            i { "not completed" }
+                        }
                     }
                 }
             }
