@@ -10,39 +10,65 @@ fn main() {    // Init logger
     dioxus::launch(App);
 }
 
-fn add_todo(todos: &mut Signal<Vec<String>>, new_todo: &Signal<String>) {
+struct Todo {
+    id: i32,
+    text: String,
+    description: String,
+    completed: bool,
+}
+
+// Add a new todo to the list
+fn add_todo(todos: &mut Signal<Vec<Todo>>, todo_name: &Signal<String>, todo_description: &Signal<String>) {
     info!("add todo");
-    let todo: String = new_todo.to_string();
-    todos.push(todo);
+
+    let todo_name: String = todo_name.to_string();
+    let description: String = todo_description.to_string();
+    let todo_struct: Todo = Todo {
+        id: todos.len() as i32 + 1,
+        text: todo_name.clone(),
+        description: description.clone(),
+        completed: false,
+    };
+
+    todos.push(todo_struct);
 }
 
 #[component]
 fn App() -> Element {
-    let mut count: Signal<i32> = use_signal(|| 0);
-    let mut todos: Signal<Vec<String>> = use_signal(|| Vec::new());
-    let mut new_todo: Signal<String> = use_signal(|| String::from(""));
+    let mut todos: Signal<Vec<Todo>> = use_signal(|| Vec::new());
+    let mut todo_name: Signal<String> = use_signal(|| String::from(""));
+    let mut todo_description: Signal<String> = use_signal(|| String::from(""));
 
     rsx! {
         link { rel: "stylesheet", href: "main.css" }
         div {
-            h1 { "Todos: {count}" }
+            h1 { "Todos: {todos.len()}" }
             ul {
                 for todo in todos.iter() {
-                    li { "{todo}" }
+                    if todo.completed {
+                        li { "{todo.id}. {todo.text}: {todo.description} (completed)" }
+                    } else {
+                        li { "{todo.id}. {todo.text}: {todo.description} (not completed)" }
+                    }
                 }
             }
             h3 { "Add a new todo:" }
             input {
-                value: "{new_todo}",
-                oninput: move |event| new_todo.set(event.value())
+                value: "{todo_name}",
+                oninput: move |event| todo_name.set(event.value())
+            }
+            br {}
+            input {
+                value: "{todo_description}",
+                oninput: move |event| todo_description.set(event.value())
             }
             div {
                 br {}
                 button {
                     onclick: move |_| {
-                        add_todo(&mut todos, &new_todo);
-                        count += 1; // Increment count
-                        new_todo.set(String::from("")); // Clear input
+                        add_todo(&mut todos, &todo_name, &todo_description);
+                        todo_name.set(String::from("")); // Clear input
+                        todo_description.set(String::from("")); // Clear input
                     },
                     "Add todo"
                 }
