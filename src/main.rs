@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 
 use dioxus::prelude::*;
+use dioxus_elements::br;
 use dioxus_logger::tracing::{info, Level};
 
 fn main() {    // Init logger
@@ -10,11 +11,40 @@ fn main() {    // Init logger
     dioxus::launch(App);
 }
 
+#[derive(Clone)] // Derive Clone to enable cloning
 struct Todo {
     id: i32,
     text: String,
     description: String,
     completed: bool,
+}
+
+impl Todo {
+    // Method to toggle the completed status of a todo
+    fn toggle_completed(&mut self) {
+        self.completed = !self.completed;
+    }
+
+    // Method to render a todo item
+    fn show_todo(&self) -> Element {
+        rsx! {
+            div {
+                //onclick: move |_| self.toggle_completed(),
+                border: "1px solid black",
+                padding: "10px",
+                margin: "5px",
+                b { "{self.id}. {self.text}" }
+                br {}
+                "Description: {self.description}"
+                br {}
+                if self.completed {
+                    i { "completed" }
+                } else {
+                    i { "not completed" }
+                }
+            }
+        }
+    }
 }
 
 // Add a new todo to the list
@@ -33,40 +63,6 @@ fn add_todo(todos: &mut Signal<Vec<Todo>>, todo_name: &Signal<String>, todo_desc
     todos.push(todo_struct);
 }
 
-impl Todo {
-    fn toggle_completed(&mut self) {
-        self.completed = !self.completed;
-    }
-
-    fn show_todo(&self) -> Element {
-        rsx! {
-            if self.completed {
-                div {
-                    border: "1px solid black",
-                    padding: "10px",
-                    margin: "5px",
-                    b { "{self.id}. {self.text}" } 
-                    br {}
-                    "Description: {self.description}"
-                    br {}
-                    i { "completed" }
-                }
-            } else {
-                div {
-                    border: "1px solid black",
-                    padding: "10px",
-                    margin: "5px",
-                    b { "{self.id}. {self.text}" } 
-                    br {}
-                    "Description: {self.description}"
-                    br {}
-                    i { "not completed" }
-                }
-            }
-        }
-    }
-}
-
 #[component]
 fn App() -> Element {
     let mut todos: Signal<Vec<Todo>> = use_signal(|| Vec::new());
@@ -83,10 +79,15 @@ fn App() -> Element {
                 }
             }
             h3 { "Add a new todo:" }
+            { "Name: " }
+            br {}
             input {
                 value: "{todo_name}",
                 oninput: move |event| todo_name.set(event.value())
             }
+            br {}
+            br {}
+            { "Description: " }
             br {}
             input {
                 value: "{todo_description}",
