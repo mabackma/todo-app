@@ -33,6 +33,40 @@ fn add_todo(todos: &mut Signal<Vec<Todo>>, todo_name: &Signal<String>, todo_desc
     todos.push(todo_struct);
 }
 
+impl Todo {
+    fn toggle_completed(&mut self) {
+        self.completed = !self.completed;
+    }
+
+    fn show_todo(&self) -> Element {
+        rsx! {
+            if self.completed {
+                div {
+                    border: "1px solid black",
+                    padding: "10px",
+                    margin: "5px",
+                    b { "{self.id}. {self.text}" } 
+                    br {}
+                    "Description: {self.description}"
+                    br {}
+                    i { "completed" }
+                }
+            } else {
+                div {
+                    border: "1px solid black",
+                    padding: "10px",
+                    margin: "5px",
+                    b { "{self.id}. {self.text}" } 
+                    br {}
+                    "Description: {self.description}"
+                    br {}
+                    i { "not completed" }
+                }
+            }
+        }
+    }
+}
+
 #[component]
 fn App() -> Element {
     let mut todos: Signal<Vec<Todo>> = use_signal(|| Vec::new());
@@ -43,25 +77,9 @@ fn App() -> Element {
         link { rel: "stylesheet", href: "main.css" }
         div {
             h1 { "Todos: {todos.len()}" }
-            ul {
+            div {
                 for todo in todos.iter() {
-                    if todo.completed {
-                        p {
-                            b { "{todo.id}. {todo.text}:" } 
-                            br {}
-                            " {todo.description}"
-                            br {}
-                            i { "completed" }
-                        }
-                    } else {
-                        p {
-                            b { "{todo.id}. {todo.text}:" } 
-                            br {}
-                            " {todo.description}"
-                            br {}
-                            i { "not completed" }
-                        }
-                    }
+                    { todo.show_todo() }
                 }
             }
             h3 { "Add a new todo:" }
