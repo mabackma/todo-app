@@ -18,31 +18,40 @@ struct Todo {
     completed: bool,
 }
 
-impl Todo {
-    fn mark_completed(&mut self) {
-        self.completed = true;
-    }
-
-    // Method to render a todo item
-    fn show_todo(&self) -> Element {
-        rsx! {
-            div {
-                
-                border: "1px solid black",
-                padding: "10px",
-                margin: "5px",
-                b { "{self.id}. {self.text}" }
-                br {}
-                "Description: {self.description}"
-                br {}
-                if self.completed {
-                    i { "completed" }
-                } else {
-                    i { "not completed" }
+// Method to render a todo item
+fn show_todo(todos: &Signal<Vec<Todo>>, todo: &Todo) -> Element {
+    let id = todo.id;
+    rsx! {
+        div {
+            onclick: {
+                let todos = todos.clone();
+                move |_| {
+                    //mark_completed(&todos, id);
+                    println!("clicked todo: {}", id);
                 }
+            },
+            border: "1px solid black",
+            padding: "10px",
+            margin: "5px",
+            b { "{todo.id}. {todo.text}" }
+            br {}
+            "Description: {todo.description}"
+            br {}
+            if todo.completed {
+                i { "completed" }
+            } else {
+                i { "not completed" }
             }
         }
     }
+}
+
+fn mark_completed(todos: &mut Signal<Vec<Todo>>, id: i32) {
+    todos.write().iter_mut().for_each(|todo| {
+        if todo.id == id {
+            todo.completed = !todo.completed;
+        }
+    });
 }
 
 // Add a new todo to the list
@@ -82,14 +91,9 @@ fn App() -> Element {
         link { rel: "stylesheet", href: "main.css" }
         div {
             h1 { "Todos: {todos.len()}" }
-
-            div {
-                for todo in todos.iter() {
-                    div {
-                        onclick: move |_| toggle_todo(21341234), // toggle_todo(todo.id), FIND A WAY TO PASS THE ID
-                        { todo.show_todo() } // Render the todo
-                    }
-                }
+            for todo in todos.iter() {
+                //onclick: move |_| toggle_todo(21341234), // toggle_todo(todo.id), FIND A WAY TO PASS THE ID
+                { show_todo(&todos, &todo) } // Render the todo
             }
             h3 { "Add a new todo:" }
             { "Name: " }
@@ -121,3 +125,4 @@ fn App() -> Element {
     }
     
 }
+ 
