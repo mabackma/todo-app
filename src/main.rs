@@ -13,7 +13,7 @@ fn main() {    // Init logger
 #[derive(Clone, Debug)] // Derive Clone to enable cloning
 struct Todo {
     id: i32,
-    text: String,
+    name: String,
     description: String,
     completed: bool,
 }
@@ -31,7 +31,7 @@ fn show_todo(todo: &Todo) -> Element {
             border: "1px solid black",
             padding: "10px",
             margin: "5px",
-            b { "{todo.id}. {todo.text}" }
+            b { "{todo.id}. {todo.name}" }
             br {}
             "Description: {todo.description}"
             br {}
@@ -52,8 +52,8 @@ fn add_todo(todos: &mut Signal<Vec<Todo>>, todo_name: &Signal<String>, todo_desc
     let description: String = todo_description.to_string();
     let new_todo: Todo = Todo {
         id: todos.len() as i32 + 1,
-        text: todo_name.clone(),
-        description: description.clone(),
+        name: todo_name,
+        description: description,
         completed: false,
     };
 
