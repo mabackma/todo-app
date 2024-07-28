@@ -19,14 +19,12 @@ struct Todo {
 }
 
 // Method to render a todo item
-fn show_todo(todos: &Signal<Vec<Todo>>, todo: &Todo) -> Element {
+fn show_todo(todo: &Todo) -> Element {
     let id = todo.id;
     rsx! {
         div {
             onclick: {
-                let todos = todos.clone();
                 move |_| {
-                    //mark_completed(&todos, id);
                     println!("clicked todo: {}", id);
                 }
             },
@@ -46,21 +44,13 @@ fn show_todo(todos: &Signal<Vec<Todo>>, todo: &Todo) -> Element {
     }
 }
 
-fn mark_completed(todos: &mut Signal<Vec<Todo>>, id: i32) {
-    todos.write().iter_mut().for_each(|todo| {
-        if todo.id == id {
-            todo.completed = !todo.completed;
-        }
-    });
-}
-
 // Add a new todo to the list
 fn add_todo(todos: &mut Signal<Vec<Todo>>, todo_name: &Signal<String>, todo_description: &Signal<String>) {
     info!("add todo");
 
     let todo_name: String = todo_name.to_string();
     let description: String = todo_description.to_string();
-    let mut new_todo: Todo = Todo {
+    let new_todo: Todo = Todo {
         id: todos.len() as i32 + 1,
         text: todo_name.clone(),
         description: description.clone(),
@@ -76,24 +66,13 @@ fn App() -> Element {
     let mut todo_name: Signal<String> = use_signal(|| "".to_string());
     let mut todo_description: Signal<String> = use_signal(|| "".to_string());
 
-    // Function to toggle completed state of a todo
-    let mut toggle_todo = move |id: i32| {
-        println!("clicked todo: {}", id);
-        let mut todos = todos.get_mut(id as usize);
-        for todo in todos.iter_mut() {
-            if todo.id == id {
-                todo.completed = !todo.completed;
-            }
-        }
-    };
-
     rsx! {
         link { rel: "stylesheet", href: "main.css" }
         div {
             h1 { "Todos: {todos.len()}" }
             for todo in todos.iter() {
                 //onclick: move |_| toggle_todo(21341234), // toggle_todo(todo.id), FIND A WAY TO PASS THE ID
-                { show_todo(&todos, &todo) } // Render the todo
+                { show_todo(&todo) } // Render the todo
             }
             h3 { "Add a new todo:" }
             { "Name: " }
