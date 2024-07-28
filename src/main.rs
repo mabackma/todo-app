@@ -71,7 +71,6 @@ fn App() -> Element {
         div {
             h1 { "Todos: {todos.len()}" }
             for todo in todos.iter() {
-                //onclick: move |_| toggle_todo(21341234), // toggle_todo(todo.id), FIND A WAY TO PASS THE ID
                 { show_todo(&todo) } // Render the todo
             }
             h3 { "Add a new todo:" }
