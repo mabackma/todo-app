@@ -54,52 +54,82 @@ fn add_todo(todos: &mut Signal<Vec<Todo>>, todo_name: &Signal<String>, todo_desc
     todos.push(new_todo);
 }
 
+fn fetch_todo_by_id(todos: &Signal<Vec<Todo>>, id: i32) -> Todo {
+    let mut selected_todo: Todo = Todo {
+        id: -1,
+        name: String::from(""),
+        description: String::from(""),
+        completed: false,
+    };
+
+    for todo in todos.iter() {
+        if todo.id == id {
+            selected_todo = todo.clone();
+        }
+    }
+
+    selected_todo
+}
+
 #[component]
 fn App() -> Element {
     let mut todos: Signal<Vec<Todo>> = use_signal(|| Vec::new());
     let mut todo_name: Signal<String> = use_signal(|| "".to_string());
     let mut todo_description: Signal<String> = use_signal(|| "".to_string());
+    let mut todo_id: Signal<i32> = use_signal(|| -1);
 
     rsx! {
         link { rel: "stylesheet", href: "main.css" }
-        div {
-            h1 { "Todos: {todos.len()}" }
-            for (i, todo) in todos.iter().enumerate() {
-                div {
-                    onclick: {
-                        move |_| {
-                            println!("clicked todo: {}", i + 1);
-                            //todo.completed = !todo.completed;
-                        }
-                    },
-                    { show_todo(&todo) } // Render the todo
-                }
-            }
-            h3 { "Add a new todo:" }
-            { "Name: " }
-            br {}
-            input {
-                value: "{todo_name}",
-                oninput: move |event| todo_name.set(event.value())
-            }
-            br {}
-            br {}
-            { "Description: " }
-            br {}
-            input {
-                value: "{todo_description}",
-                oninput: move |event| todo_description.set(event.value())
-            }
+        if *todo_id.read() == -1 {
             div {
-                br {}
-                button {
-                    onclick: move |_| {
-                        add_todo(&mut todos, &todo_name, &todo_description);
-                        todo_name.set(String::from("")); // Clear input
-                        todo_description.set(String::from("")); // Clear input
-                    },
-                    "Add todo"
+                h1 { "Todos: {todos.len()}" }
+                for (i, todo) in todos.iter().enumerate() {
+                    div {
+                        onclick: {
+                            move |_| {
+                                println!("clicked todo: {}", i + 1);
+                                todo_id.set((i + 1) as i32);
+                            }
+                        },
+                        { show_todo(&todo) } // Render the todo
+                    }
                 }
+            }
+        }
+        else {
+            div {
+                h1 { "Edit todo: {todo_id}" }
+                { 
+                    let selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
+                    show_todo(&selected_todo) 
+                }
+            }
+        }
+
+        h3 { "Add a new todo:" }
+        { "Name: " }
+        br {}
+        input {
+            value: "{todo_name}",
+            oninput: move |event| todo_name.set(event.value())
+        }
+        br {}
+        br {}
+        { "Description: " }
+        br {}
+        input {
+            value: "{todo_description}",
+            oninput: move |event| todo_description.set(event.value())
+        }
+        div {
+            br {}
+            button {
+                onclick: move |_| {
+                    add_todo(&mut todos, &todo_name, &todo_description);
+                    todo_name.set(String::from("")); // Clear input
+                    todo_description.set(String::from("")); // Clear input
+                },
+                "Add todo"
             }
         }
     }
