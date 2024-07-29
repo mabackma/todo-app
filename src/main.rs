@@ -18,6 +18,18 @@ struct Todo {
     completed: bool,
 }
 
+// Create a new todo item with default values
+impl Todo {
+    fn new() -> Self {
+        Self {
+            id: -1,
+            name: String::from(""),
+            description: String::from(""),
+            completed: false,
+        }
+    }
+}
+
 // Method to render a todo item
 fn show_todo(todo: &Todo) -> Element {
     rsx! {
@@ -54,13 +66,9 @@ fn add_todo(todos: &mut Signal<Vec<Todo>>, todo_name: &Signal<String>, todo_desc
     todos.push(new_todo);
 }
 
+// Fetch a todo by its id
 fn fetch_todo_by_id(todos: &Signal<Vec<Todo>>, id: i32) -> Todo {
-    let mut selected_todo: Todo = Todo {
-        id: -1,
-        name: String::from(""),
-        description: String::from(""),
-        completed: false,
-    };
+    let mut selected_todo: Todo = Todo::new();
 
     for todo in todos.iter() {
         if todo.id == id {
@@ -98,7 +106,7 @@ fn App() -> Element {
         }
         else {
             div {
-                h1 { "Edit todo: {todo_id}" }
+                h1 { "Edit todo #{todo_id}" }
                 { 
                     let selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
                     show_todo(&selected_todo) 
