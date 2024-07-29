@@ -20,14 +20,8 @@ struct Todo {
 
 // Method to render a todo item
 fn show_todo(todo: &Todo) -> Element {
-    let id = todo.id;
     rsx! {
         div {
-            onclick: {
-                move |_| {
-                    println!("clicked todo: {}", id);
-                }
-            },
             border: "1px solid black",
             padding: "10px",
             margin: "5px",
@@ -70,8 +64,16 @@ fn App() -> Element {
         link { rel: "stylesheet", href: "main.css" }
         div {
             h1 { "Todos: {todos.len()}" }
-            for todo in todos.iter() {
-                { show_todo(&todo) } // Render the todo
+            for (i, todo) in todos.iter().enumerate() {
+                div {
+                    onclick: {
+                        move |_| {
+                            println!("clicked todo: {}", i + 1);
+                            //todo.completed = !todo.completed;
+                        }
+                    },
+                    { show_todo(&todo) } // Render the todo
+                }
             }
             h3 { "Add a new todo:" }
             { "Name: " }
