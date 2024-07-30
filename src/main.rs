@@ -168,15 +168,13 @@ fn EditTodo(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
             button {
                 margin: "5px",
                 onclick: {
-                    let mut todos = todos.clone();
-                    let todo_name = todo_name.clone();
-                    let todo_description = todo_description.clone();
                     move |_| {
                         let mut todos_vec = todos.write();
                         if let Some(todo) = todos_vec.iter_mut().find(|todo| todo.id == *todo_id.read()) {
                             todo.name = todo_name.read().to_string();
                             todo.description = todo_description.read().to_string();
                         }
+                        //todos.set(todos_vec.clone());
                         todo_id.set(-1); // Go back to the main view
                     }
                 },
