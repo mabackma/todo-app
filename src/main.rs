@@ -106,10 +106,15 @@ fn App() -> Element {
         }
         else {
             div {
-                h1 { "Edit todo #{todo_id}" }
                 { 
-                    let selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
-                    show_todo(&selected_todo) 
+                    let mut selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
+                    show_todo(&mut selected_todo)
+                }
+                button {
+                    onclick: move |_| {
+                        todo_id.set(-1);
+                    },
+                    "Back"
                 }
             }
         }
