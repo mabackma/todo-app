@@ -95,49 +95,55 @@ fn App() -> Element {
 
     rsx! {
         link { rel: "stylesheet", href: "main.css" }
+
         if *todo_id.read() == -1 {
             div {
-                h1 { "Todos: {todos.len()}" }
-                for (i, todo) in todos.iter().enumerate() {
-                    div {
-                        onclick: {
-                            move |_| {
-                                println!("clicked todo: {}", i + 1);
-                                todo_id.set((i + 1) as i32);
-                            }
+                if todos.len() == 0 {
+                    h1 { "No todos yet" }
+                } else {
+                    h1 { "Todos: {todos.len()}" }
+                    h3 { "Click on a todo to view details" }
+                    for (i, todo) in todos.iter().enumerate() {
+                        div {
+                            onclick: {
+                                move |_| {
+                                    println!("clicked todo: {}", i + 1);
+                                    todo_id.set((i + 1) as i32);
+                                }
+                            },
+                            { show_todo(&todo) } // Render the todo
+                        }
+                    }
+                }
+
+                h3 { "Add a new todo:" }
+                { "Name: " }
+                br {}
+                input {
+                    value: "{todo_name}",
+                    oninput: move |event| todo_name.set(event.value())
+                }
+                br {}
+                br {}
+                { "Description: " }
+                br {}
+                input {
+                    value: "{todo_description}",
+                    oninput: move |event| todo_description.set(event.value())
+                }
+                div {
+                    br {}
+                    button {
+                        onclick: move |_| {
+                            add_todo(&mut todos, &todo_name, &todo_description);
+                            todo_name.set(String::from("")); // Clear input
+                            todo_description.set(String::from("")); // Clear input
                         },
-                        { show_todo(&todo) } // Render the todo
+                        "Add todo"
                     }
                 }
             }
-            h3 { "Add a new todo:" }
-            { "Name: " }
-            br {}
-            input {
-                value: "{todo_name}",
-                oninput: move |event| todo_name.set(event.value())
-            }
-            br {}
-            br {}
-            { "Description: " }
-            br {}
-            input {
-                value: "{todo_description}",
-                oninput: move |event| todo_description.set(event.value())
-            }
-            div {
-                br {}
-                button {
-                    onclick: move |_| {
-                        add_todo(&mut todos, &todo_name, &todo_description);
-                        todo_name.set(String::from("")); // Clear input
-                        todo_description.set(String::from("")); // Clear input
-                    },
-                    "Add todo"
-                }
-            }
-        }
-        else {
+        } else {
             div {
                 { 
                     let mut selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
@@ -183,6 +189,5 @@ fn App() -> Element {
             }
         }
     }
-    
 }
  
