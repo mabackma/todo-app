@@ -159,18 +159,20 @@ fn EditTodo(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
         div {
             { show_todo(&mut selected_todo) } 
         }
-        button {
-            margin: "5px",
-            onclick: {
-                let todo_id = todo_id.clone();
-                move |_| {
-                    let mut todos_vec = todos.write();
-                    if let Some(todo) = todos_vec.iter_mut().find(|todo| todo.id == *todo_id.read()) {
-                        todo.completed = !todo.completed;
+        div {
+            button {
+                margin: "5px",
+                onclick: {
+                    let todo_id = todo_id.clone();
+                    move |_| {
+                        let mut todos_vec = todos.write();
+                        if let Some(todo) = todos_vec.iter_mut().find(|todo| todo.id == *todo_id.read()) {
+                            todo.completed = !todo.completed;
+                        }
                     }
-                }
-            },
-            "Toggle completed"
+                },
+                "Toggle completed"
+            }
         }
         br {}
         br {}
@@ -231,14 +233,16 @@ fn App() -> Element {
     let todo_id: Signal<i32> = use_signal(|| -1);
 
     rsx! {
-        link { rel: "stylesheet", href: "main.css" }
-
-        if *todo_id.read() == -1 {
-            TodoList { todos, todo_id }
-            br {}
-            AddTodoForm { todos, todo_name, todo_description } 
-        } else {
-            EditTodo { todos, todo_id }
+        link { rel: "stylesheet", href: "../assets/main.css" }
+        div {
+            class: "app-container",
+            if *todo_id.read() == -1 {
+                TodoList { todos, todo_id }
+                br {}
+                AddTodoForm { todos, todo_name, todo_description } 
+            } else {
+                EditTodo { todos, todo_id }
+            }
         }
     }
 }
