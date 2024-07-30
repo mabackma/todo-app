@@ -109,6 +109,78 @@ fn TodoList(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
     }
 }
 
+#[component]
+fn EditTodo(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
+    rsx! {
+        div {
+            h3 { "Edit todo" }
+            { 
+                let mut selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
+                show_todo(&mut selected_todo)
+            } 
+            /* 
+            input {
+                value: "{selected_todo.name}",
+                oninput: move |event| selected_todo.name = event.value()
+            }
+            br {}
+            input {
+                value: "{selected_todo.description}",
+                oninput: move |event| selected_todo.description = event.value()
+            }
+            br {}
+            button {
+                onclick: {
+                    let mut todos = todos.write();
+                    let mut selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
+                    selected_todo.name = selected_todo.name.clone();
+                    selected_todo.description = selected_todo.description.clone();
+                    todo_id.set(-1);
+                },
+                "Save"
+            }
+            */
+            button {
+                margin: "5px",
+                onclick: {
+                    let todo_id = todo_id.clone();
+                    move |_| {
+                        let mut todos = todos.write();
+                        if let Some(mut todo) = todos.iter_mut().find(|todo| todo.id == *todo_id.read()) {
+                            todo.completed = !todo.completed;
+                        }
+                    }
+                },
+                "Toggle completed"
+            }
+            button {
+                margin: "5px",
+                onclick: {
+                    let mut todo_id = todo_id.clone();
+                    move |_| {
+                        let mut todos = todos.write();
+                        todos.retain(|todo| todo.id != *todo_id.read());
+                        reassign_ids(&mut todos);
+                        todo_id.set(-1);
+                    }
+                },
+                "Delete"
+            }
+            br {}
+            br {}
+            button {
+                onclick: {
+                    let mut todo_id = todo_id.clone();
+                    move |_| {
+                        todo_id.set(-1);
+                    }
+                },
+                "Back"
+            }
+        }
+    }
+}
+
 // Add a new todo to the list
 fn add_todo(todos: &mut Signal<Vec<Todo>>, todo_name: &Signal<String>, todo_description: &Signal<String>) {
     info!("add todo");
@@ -147,63 +219,19 @@ fn reassign_ids(todos: &mut Vec<Todo>) {
 
 #[component]
 fn App() -> Element {
-    let mut todos: Signal<Vec<Todo>> = use_signal(|| Vec::new());
+    let todos: Signal<Vec<Todo>> = use_signal(|| Vec::new());
     let todo_name: Signal<String> = use_signal(|| "".to_string());
     let todo_description: Signal<String> = use_signal(|| "".to_string());
-    let mut todo_id: Signal<i32> = use_signal(|| -1);
+    let todo_id: Signal<i32> = use_signal(|| -1);
 
     rsx! {
         link { rel: "stylesheet", href: "main.css" }
 
         if *todo_id.read() == -1 {
-            div {
-                TodoList { todos, todo_id }
-                AddTodoForm { todos, todo_name, todo_description }
-            }
+            TodoList { todos, todo_id }
+            AddTodoForm { todos, todo_name, todo_description } 
         } else {
-            div {
-                { 
-                    let mut selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
-                    show_todo(&mut selected_todo)
-                } 
-                button {
-                    margin: "5px",
-                    onclick: {
-                        let todo_id = todo_id.clone();
-                        move |_| {
-                            let mut todos = todos.write();
-                            if let Some(mut todo) = todos.iter_mut().find(|todo| todo.id == *todo_id.read()) {
-                                todo.completed = !todo.completed;
-                            }
-                        }
-                    },
-                    "Toggle completed"
-                }
-                button {
-                    margin: "5px",
-                    onclick: {
-                        let mut todo_id = todo_id.clone();
-                        move |_| {
-                            let mut todos = todos.write();
-                            todos.retain(|todo| todo.id != *todo_id.read());
-                            reassign_ids(&mut todos);
-                            todo_id.set(-1);
-                        }
-                    },
-                    "Delete"
-                }
-                br {}
-                br {}
-                button {
-                    onclick: {
-                        let mut todo_id = todo_id.clone();
-                        move |_| {
-                            todo_id.set(-1);
-                        }
-                    },
-                    "Back"
-                }
-            }
+            EditTodo { todos, todo_id }
         }
     }
 }
