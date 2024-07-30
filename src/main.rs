@@ -148,6 +148,9 @@ fn TodoList(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
 #[component]
 fn EditTodo(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
     let mut selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
+    let todo_name = use_signal(|| selected_todo.name.clone());
+    let todo_description = use_signal(|| selected_todo.description.clone());
+
     rsx! {
         div {
             h3 { "Edit todo" }
@@ -165,12 +168,16 @@ fn EditTodo(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
             button {
                 margin: "5px",
                 onclick: {
-                    let mut todo_id = todo_id.clone();
+                    let mut todos = todos.clone();
+                    let todo_name = todo_name.clone();
+                    let todo_description = todo_description.clone();
                     move |_| {
-                        println!("save todo");
-                        //selected_todo.name = selected_todo.name.clone();
-                        //selected_todo.description = selected_todo.description.clone();
-                        //todo_id.set(-1);
+                        let mut todos_vec = todos.write();
+                        if let Some(todo) = todos_vec.iter_mut().find(|todo| todo.id == *todo_id.read()) {
+                            todo.name = todo_name.read().to_string();
+                            todo.description = todo_description.read().to_string();
+                        }
+                        todo_id.set(-1); // Go back to the main view
                     }
                 },
                 "Save"
@@ -180,8 +187,8 @@ fn EditTodo(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
                 onclick: {
                     let todo_id = todo_id.clone();
                     move |_| {
-                        let mut todos = todos.write();
-                        if let Some(todo) = todos.iter_mut().find(|todo| todo.id == *todo_id.read()) {
+                        let mut todos_vec = todos.write();
+                        if let Some(todo) = todos_vec.iter_mut().find(|todo| todo.id == *todo_id.read()) {
                             todo.completed = !todo.completed;
                         }
                     }
