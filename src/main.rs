@@ -84,6 +84,31 @@ fn AddTodoForm(todos: Signal<Vec<Todo>>, todo_name: Signal<String>, todo_descrip
     }
 }
 
+#[component]
+fn TodoList(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
+    rsx! {
+        div {
+            if todos.len() == 0 {
+                h1 { "No todos yet" }
+            } else {
+                h1 { "Todos: {todos.len()}" }
+                h3 { "Click on a todo to view details" }
+                for (i, todo) in todos.iter().enumerate() {
+                    div {
+                        onclick: {
+                            move |_| {
+                                println!("clicked todo: {}", i + 1);
+                                todo_id.set((i + 1) as i32);
+                            }
+                        },
+                        { show_todo(&todo) } // Render the todo
+                    }
+                }
+            }
+        }
+    }
+}
+
 // Add a new todo to the list
 fn add_todo(todos: &mut Signal<Vec<Todo>>, todo_name: &Signal<String>, todo_description: &Signal<String>) {
     info!("add todo");
@@ -123,8 +148,8 @@ fn reassign_ids(todos: &mut Vec<Todo>) {
 #[component]
 fn App() -> Element {
     let mut todos: Signal<Vec<Todo>> = use_signal(|| Vec::new());
-    let mut todo_name: Signal<String> = use_signal(|| "".to_string());
-    let mut todo_description: Signal<String> = use_signal(|| "".to_string());
+    let todo_name: Signal<String> = use_signal(|| "".to_string());
+    let todo_description: Signal<String> = use_signal(|| "".to_string());
     let mut todo_id: Signal<i32> = use_signal(|| -1);
 
     rsx! {
@@ -132,24 +157,7 @@ fn App() -> Element {
 
         if *todo_id.read() == -1 {
             div {
-                if todos.len() == 0 {
-                    h1 { "No todos yet" }
-                } else {
-                    h1 { "Todos: {todos.len()}" }
-                    h3 { "Click on a todo to view details" }
-                    for (i, todo) in todos.iter().enumerate() {
-                        div {
-                            onclick: {
-                                move |_| {
-                                    println!("clicked todo: {}", i + 1);
-                                    todo_id.set((i + 1) as i32);
-                                }
-                            },
-                            { show_todo(&todo) } // Render the todo
-                        }
-                    }
-                }
-
+                TodoList { todos, todo_id }
                 AddTodoForm { todos, todo_name, todo_description }
             }
         } else {
