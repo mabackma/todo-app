@@ -79,6 +79,13 @@ fn fetch_todo_by_id(todos: &Signal<Vec<Todo>>, id: i32) -> Todo {
     selected_todo
 }
 
+// Reassign IDs 
+fn reassign_ids(todos: &mut Vec<Todo>) {
+    for (index, todo) in todos.iter_mut().enumerate() {
+        todo.id = index as i32 + 1;
+    }
+}
+
 #[component]
 fn App() -> Element {
     let mut todos: Signal<Vec<Todo>> = use_signal(|| Vec::new());
@@ -129,6 +136,7 @@ fn App() -> Element {
                         move |_| {
                             let mut todos = todos.write();
                             todos.retain(|todo| todo.id != *todo_id.read());
+                            reassign_ids(&mut todos);
                             todo_id.set(-1);
                         }
                     },
