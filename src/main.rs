@@ -110,6 +110,32 @@ fn App() -> Element {
                     }
                 }
             }
+            h3 { "Add a new todo:" }
+            { "Name: " }
+            br {}
+            input {
+                value: "{todo_name}",
+                oninput: move |event| todo_name.set(event.value())
+            }
+            br {}
+            br {}
+            { "Description: " }
+            br {}
+            input {
+                value: "{todo_description}",
+                oninput: move |event| todo_description.set(event.value())
+            }
+            div {
+                br {}
+                button {
+                    onclick: move |_| {
+                        add_todo(&mut todos, &todo_name, &todo_description);
+                        todo_name.set(String::from("")); // Clear input
+                        todo_description.set(String::from("")); // Clear input
+                    },
+                    "Add todo"
+                }
+            }
         }
         else {
             div {
@@ -118,19 +144,20 @@ fn App() -> Element {
                     show_todo(&mut selected_todo)
                 } 
                 button {
+                    margin: "5px",
                     onclick: {
-                        let mut todo_id = todo_id.clone();
+                        let todo_id = todo_id.clone();
                         move |_| {
                             let mut todos = todos.write();
                             if let Some(mut todo) = todos.iter_mut().find(|todo| todo.id == *todo_id.read()) {
                                 todo.completed = !todo.completed;
                             }
-                            todo_id.set(-1);
                         }
                     },
                     "Toggle completed"
                 }
                 button {
+                    margin: "5px",
                     onclick: {
                         let mut todo_id = todo_id.clone();
                         move |_| {
@@ -142,33 +169,17 @@ fn App() -> Element {
                     },
                     "Delete"
                 }
-            }
-        }
-
-        h3 { "Add a new todo:" }
-        { "Name: " }
-        br {}
-        input {
-            value: "{todo_name}",
-            oninput: move |event| todo_name.set(event.value())
-        }
-        br {}
-        br {}
-        { "Description: " }
-        br {}
-        input {
-            value: "{todo_description}",
-            oninput: move |event| todo_description.set(event.value())
-        }
-        div {
-            br {}
-            button {
-                onclick: move |_| {
-                    add_todo(&mut todos, &todo_name, &todo_description);
-                    todo_name.set(String::from("")); // Clear input
-                    todo_description.set(String::from("")); // Clear input
-                },
-                "Add todo"
+                br {}
+                br {}
+                button {
+                    onclick: {
+                        let mut todo_id = todo_id.clone();
+                        move |_| {
+                            todo_id.set(-1);
+                        }
+                    },
+                    "Back"
+                }
             }
         }
     }
