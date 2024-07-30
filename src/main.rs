@@ -37,6 +37,7 @@ fn show_todo(todo: &Todo) -> Element {
             border: "1px solid black",
             padding: "10px",
             margin: "5px",
+            background: "aliceblue",
             b { "{todo.id}. {todo.name}" }
             br {}
             "Description: {todo.description}"
@@ -90,14 +91,17 @@ fn reassign_ids(todos: &mut Vec<Todo>) {
 fn AddTodoForm(todos: Signal<Vec<Todo>>, todo_name: Signal<String>, todo_description: Signal<String>) -> Element {
     rsx! {
         div {
-            h3 { "Add a new todo:" }
+            border: "1px solid black",
+            padding: "10px",
+            margin: "5px",
+            b { "Add a new todo:" }
+            br {}
             { "Name: " }
             br {}
             input {
                 value: "{todo_name}",
                 oninput: move |event| todo_name.set(event.value())
             }
-            br {}
             br {}
             { "Description: " }
             br {}
@@ -125,10 +129,10 @@ fn TodoList(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
     rsx! {
         div {
             if todos.len() == 0 {
-                h1 { "No todos yet" }
+                h1 { margin: "5px", "No todos yet" }
             } else {
-                h1 { "Todos: {todos.len()}" }
-                h3 { "Click on a todo to view details" }
+                h1 { margin: "5px", "Todos: {todos.len()}" }
+                b { margin: "5px", "Click on a todo to view details" }
                 for (i, todo) in todos.iter().enumerate() {
                     div {
                         onclick: {
@@ -148,53 +152,62 @@ fn TodoList(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
 #[component]
 fn EditTodo(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
     let mut selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
-    let todo_name = use_signal(|| selected_todo.name.clone());
-    let todo_description = use_signal(|| selected_todo.description.clone());
+    let mut todo_name = use_signal(|| selected_todo.name.clone());
+    let mut todo_description = use_signal(|| selected_todo.description.clone());
 
     rsx! {
         div {
-            h3 { "Edit todo" }
             { show_todo(&mut selected_todo) } 
+        }
+        button {
+            margin: "5px",
+            onclick: {
+                let todo_id = todo_id.clone();
+                move |_| {
+                    let mut todos_vec = todos.write();
+                    if let Some(todo) = todos_vec.iter_mut().find(|todo| todo.id == *todo_id.read()) {
+                        todo.completed = !todo.completed;
+                    }
+                }
+            },
+            "Toggle completed"
+        }
+        br {}
+        br {}
+        div {
+            border: "1px solid black",
+            padding: "10px",
+            margin: "5px",
+            b { "Edit todo" }
+            br {}
+            { "Name: " }
             input {
                 value: "{selected_todo.name}",
-                oninput: move |event| selected_todo.name = event.value()
+                oninput: move |event| todo_name.set(event.value())
             }
             br {}
+            { "Description: " }
             input {
                 value: "{selected_todo.description}",
-                oninput: move |event| selected_todo.description = event.value()
+                oninput: move |event| todo_description.set(event.value())
             }
             br {}
             button {
-                margin: "5px",
+                margin_right: "10px",
                 onclick: {
                     move |_| {
                         let mut todos_vec = todos.write();
                         if let Some(todo) = todos_vec.iter_mut().find(|todo| todo.id == *todo_id.read()) {
-                            todo.name = todo_name.read().to_string();
-                            todo.description = todo_description.read().to_string();
+                            selected_todo.name = todo_name.read().to_string();
+                            selected_todo.description = todo_description.read().to_string();
+                            *todo = selected_todo.clone();
                         }
-                        //todos.set(todos_vec.clone());
                         todo_id.set(-1); // Go back to the main view
                     }
                 },
                 "Save"
             }
             button {
-                margin: "5px",
-                onclick: {
-                    let todo_id = todo_id.clone();
-                    move |_| {
-                        let mut todos_vec = todos.write();
-                        if let Some(todo) = todos_vec.iter_mut().find(|todo| todo.id == *todo_id.read()) {
-                            todo.completed = !todo.completed;
-                        }
-                    }
-                },
-                "Toggle completed"
-            }
-            button {
-                margin: "5px",
                 onclick: {
                     let mut todo_id = todo_id.clone();
                     move |_| {
@@ -205,17 +218,6 @@ fn EditTodo(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
                     }
                 },
                 "Delete"
-            }
-            br {}
-            br {}
-            button {
-                onclick: {
-                    let mut todo_id = todo_id.clone();
-                    move |_| {
-                        todo_id.set(-1);
-                    }
-                },
-                "Back"
             }
         }
     }
@@ -233,6 +235,7 @@ fn App() -> Element {
 
         if *todo_id.read() == -1 {
             TodoList { todos, todo_id }
+            br {}
             AddTodoForm { todos, todo_name, todo_description } 
         } else {
             EditTodo { todos, todo_id }
