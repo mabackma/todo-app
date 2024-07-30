@@ -109,12 +109,30 @@ fn App() -> Element {
                 { 
                     let mut selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
                     show_todo(&mut selected_todo)
+                } 
+                button {
+                    onclick: {
+                        let mut todo_id = todo_id.clone();
+                        move |_| {
+                            let mut todos = todos.write();
+                            if let Some(mut todo) = todos.iter_mut().find(|todo| todo.id == *todo_id.read()) {
+                                todo.completed = !todo.completed;
+                            }
+                            todo_id.set(-1);
+                        }
+                    },
+                    "Toggle completed"
                 }
                 button {
-                    onclick: move |_| {
-                        todo_id.set(-1);
+                    onclick: {
+                        let mut todo_id = todo_id.clone();
+                        move |_| {
+                            let mut todos = todos.write();
+                            todos.retain(|todo| todo.id != *todo_id.read());
+                            todo_id.set(-1);
+                        }
                     },
-                    "Back"
+                    "Delete"
                 }
             }
         }
