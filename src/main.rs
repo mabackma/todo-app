@@ -50,6 +50,42 @@ fn show_todo(todo: &Todo) -> Element {
     }
 }
 
+// Add a new todo to the list
+fn add_todo(todos: &mut Signal<Vec<Todo>>, todo_name: &Signal<String>, todo_description: &Signal<String>) {
+    info!("add todo");
+
+    let todo_name: String = todo_name.to_string();
+    let description: String = todo_description.to_string();
+    let new_todo: Todo = Todo {
+        id: todos.len() as i32 + 1,
+        name: todo_name,
+        description: description,
+        completed: false,
+    };
+
+    todos.push(new_todo);
+}
+
+// Fetch a todo by its id
+fn fetch_todo_by_id(todos: &Signal<Vec<Todo>>, id: i32) -> Todo {
+    let mut selected_todo: Todo = Todo::new();
+
+    for todo in todos.iter() {
+        if todo.id == id {
+            selected_todo = todo.clone();
+        }
+    }
+
+    selected_todo
+}
+
+// Reassign IDs 
+fn reassign_ids(todos: &mut Vec<Todo>) {
+    for (index, todo) in todos.iter_mut().enumerate() {
+        todo.id = index as i32 + 1;
+    }
+}
+
 #[component]
 fn AddTodoForm(todos: Signal<Vec<Todo>>, todo_name: Signal<String>, todo_description: Signal<String>) -> Element {
     rsx! {
@@ -111,14 +147,11 @@ fn TodoList(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
 
 #[component]
 fn EditTodo(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
+    let mut selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
     rsx! {
         div {
             h3 { "Edit todo" }
-            { 
-                let mut selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
-                show_todo(&mut selected_todo)
-            } 
-            /* 
+            { show_todo(&mut selected_todo) } 
             input {
                 value: "{selected_todo.name}",
                 oninput: move |event| selected_todo.name = event.value()
@@ -130,23 +163,25 @@ fn EditTodo(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
             }
             br {}
             button {
+                margin: "5px",
                 onclick: {
-                    let mut todos = todos.write();
-                    let mut selected_todo = fetch_todo_by_id(&todos, *todo_id.read());
-                    selected_todo.name = selected_todo.name.clone();
-                    selected_todo.description = selected_todo.description.clone();
-                    todo_id.set(-1);
+                    let mut todo_id = todo_id.clone();
+                    move |_| {
+                        println!("save todo");
+                        //selected_todo.name = selected_todo.name.clone();
+                        //selected_todo.description = selected_todo.description.clone();
+                        //todo_id.set(-1);
+                    }
                 },
                 "Save"
             }
-            */
             button {
                 margin: "5px",
                 onclick: {
                     let todo_id = todo_id.clone();
                     move |_| {
                         let mut todos = todos.write();
-                        if let Some(mut todo) = todos.iter_mut().find(|todo| todo.id == *todo_id.read()) {
+                        if let Some(todo) = todos.iter_mut().find(|todo| todo.id == *todo_id.read()) {
                             todo.completed = !todo.completed;
                         }
                     }
@@ -178,42 +213,6 @@ fn EditTodo(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
                 "Back"
             }
         }
-    }
-}
-
-// Add a new todo to the list
-fn add_todo(todos: &mut Signal<Vec<Todo>>, todo_name: &Signal<String>, todo_description: &Signal<String>) {
-    info!("add todo");
-
-    let todo_name: String = todo_name.to_string();
-    let description: String = todo_description.to_string();
-    let new_todo: Todo = Todo {
-        id: todos.len() as i32 + 1,
-        name: todo_name,
-        description: description,
-        completed: false,
-    };
-
-    todos.push(new_todo);
-}
-
-// Fetch a todo by its id
-fn fetch_todo_by_id(todos: &Signal<Vec<Todo>>, id: i32) -> Todo {
-    let mut selected_todo: Todo = Todo::new();
-
-    for todo in todos.iter() {
-        if todo.id == id {
-            selected_todo = todo.clone();
-        }
-    }
-
-    selected_todo
-}
-
-// Reassign IDs 
-fn reassign_ids(todos: &mut Vec<Todo>) {
-    for (index, todo) in todos.iter_mut().enumerate() {
-        todo.id = index as i32 + 1;
     }
 }
 
