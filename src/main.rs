@@ -50,6 +50,40 @@ fn show_todo(todo: &Todo) -> Element {
     }
 }
 
+#[component]
+fn AddTodoForm(todos: Signal<Vec<Todo>>, todo_name: Signal<String>, todo_description: Signal<String>) -> Element {
+    rsx! {
+        div {
+            h3 { "Add a new todo:" }
+            { "Name: " }
+            br {}
+            input {
+                value: "{todo_name}",
+                oninput: move |event| todo_name.set(event.value())
+            }
+            br {}
+            br {}
+            { "Description: " }
+            br {}
+            input {
+                value: "{todo_description}",
+                oninput: move |event| todo_description.set(event.value())
+            }
+            div {
+                br {}
+                button {
+                    onclick: move |_| {
+                        add_todo(&mut todos, &todo_name, &todo_description);
+                        todo_name.set(String::from("")); // Clear input
+                        todo_description.set(String::from("")); // Clear input
+                    },
+                    "Add todo"
+                }
+            }
+        }
+    }
+}
+
 // Add a new todo to the list
 fn add_todo(todos: &mut Signal<Vec<Todo>>, todo_name: &Signal<String>, todo_description: &Signal<String>) {
     info!("add todo");
@@ -116,32 +150,7 @@ fn App() -> Element {
                     }
                 }
 
-                h3 { "Add a new todo:" }
-                { "Name: " }
-                br {}
-                input {
-                    value: "{todo_name}",
-                    oninput: move |event| todo_name.set(event.value())
-                }
-                br {}
-                br {}
-                { "Description: " }
-                br {}
-                input {
-                    value: "{todo_description}",
-                    oninput: move |event| todo_description.set(event.value())
-                }
-                div {
-                    br {}
-                    button {
-                        onclick: move |_| {
-                            add_todo(&mut todos, &todo_name, &todo_description);
-                            todo_name.set(String::from("")); // Clear input
-                            todo_description.set(String::from("")); // Clear input
-                        },
-                        "Add todo"
-                    }
-                }
+                AddTodoForm { todos, todo_name, todo_description }
             }
         } else {
             div {
