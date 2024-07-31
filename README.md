@@ -1,6 +1,8 @@
 ```bash
 cargo install dioxus-cli
+```
 
+```bash
 cargo build
 ```
 
