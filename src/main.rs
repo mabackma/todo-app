@@ -132,7 +132,7 @@ fn TodoList(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
                 h1 { margin: "5px", "No todos yet" }
             } else {
                 h1 { margin: "5px", "Todos: {todos.len()}" }
-                b { margin: "5px", "Click on a todo to view details" }
+                b { margin: "5px", "Click on a todo to view details and edit" }
                 for (i, todo) in todos.iter().enumerate() {
                     div {
                         onclick: {
@@ -184,13 +184,13 @@ fn EditTodo(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
             br {}
             { "Name: " }
             input {
-                value: "{selected_todo.name}",
+                value: "{todo_name}",
                 oninput: move |event| todo_name.set(event.value())
             }
             br {}
             { "Description: " }
             input {
-                value: "{selected_todo.description}",
+                value: "{todo_description}",
                 oninput: move |event| todo_description.set(event.value())
             }
             br {}
