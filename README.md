@@ -1,6 +1,10 @@
+# Install Dioxus CLI
+
 ```bash
 cargo install dioxus-cli
 ```
+
+# Build the project
 
 ```bash
 cargo build
