@@ -1,3 +1,7 @@
+## cargo install dioxus-cli
+
+## cargo build
+
 # Development
 
 Run the following command in the root of the project to start the Dioxus dev server:
