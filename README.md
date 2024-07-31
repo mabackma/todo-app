@@ -1,6 +1,8 @@
-## cargo install dioxus-cli
+```bash
+cargo install dioxus-cli
 
-## cargo build
+cargo build
+```
 
 # Development
 
