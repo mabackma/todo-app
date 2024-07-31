@@ -3,13 +3,6 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
 
-fn main() {    // Init logger
-    dioxus_logger::init(Level::INFO).expect("failed to init logger");
-    info!("starting app");
-
-    dioxus::launch(App);
-}
-
 #[derive(Clone, Debug)] // Derive Clone to enable cloning
 struct Todo {
     id: i32,
@@ -223,6 +216,13 @@ fn EditTodo(todos: Signal<Vec<Todo>>, todo_id: Signal<i32>) -> Element {
             }
         }
     }
+}
+
+fn main() {    // Init logger
+    dioxus_logger::init(Level::INFO).expect("failed to init logger");
+    info!("starting app");
+
+    dioxus::launch(App);
 }
 
 #[component]
